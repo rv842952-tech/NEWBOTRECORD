@@ -974,6 +974,7 @@ async def _schedule_multiday(update, session):
 # Main message handler (conversation FSM)
 # ─────────────────────────────────────────────
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global _record_next_pos, _record_session, _record_mode
     if not update.effective_user or not _is_admin(update): return
 
     uid  = update.effective_user.id
@@ -999,7 +1000,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "⚠️ No posts collected. Session cancelled.",
                     reply_markup=get_mode_keyboard())
             else:
-                global _record_next_pos
                 saved = 0
                 for p in _record_session:
                     db.cycle_insert_post(
@@ -1033,7 +1033,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if sess.get('mode') == 'clear_library_confirm':
         if text.strip().upper() == 'CONFIRM':
             deleted = db.cycle_clear(BOT_ID)
-            global _record_next_pos
             _record_next_pos = 1
             await update.message.reply_text(
                 f"🗑 <b>Library cleared.</b> {deleted} posts deleted.",
